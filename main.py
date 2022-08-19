@@ -3,7 +3,7 @@ import sys
 
 from PyQt5.QtCore import *
 from PyQt5.QtWidgets import *
-from PyQt5.QtGui import QPalette, QColor
+from PyQt5.QtGui import *
 
 
 
@@ -48,6 +48,51 @@ class PandasModel(QAbstractTableModel):
             return self._data.columns[col]
         return None
 
+class AddProduct(QDialog):
+    def __init__(self,product_info):
+        super().__init__()
+        self.setFixedSize(500,100)
+        self.layout = QVBoxLayout()
+
+        self.temp_product = product_info
+        self.temp_product = list(map(str,self.temp_product))
+
+        self.tableView = QTableView()
+        self.layout.addWidget(self.tableView)
+    
+        self.model =  QStandardItemModel(0,6)
+        self.model.insertRow(0,list(map(QStandardItem,self.temp_product)))
+        self.model.setRowCount(1)
+        self.model.itemChanged.connect(self.Itemchanged)
+
+
+        self.model.setHeaderData(0, Qt.Horizontal,"ID")
+        self.model.setHeaderData(1, Qt.Horizontal,"Descripción")
+        self.model.setHeaderData(2, Qt.Horizontal,"Precio (KG)")
+        self.model.setHeaderData(3, Qt.Horizontal,"Cantidad ($)")
+        self.model.setHeaderData(4, Qt.Horizontal,"Cantidad (KG)")
+        self.model.setHeaderData(5, Qt.Horizontal,"Total")
+
+        self.tableView.setModel(self.model)
+
+        header = self.tableView.horizontalHeader()
+        # header.setCont
+        header.setSectionResizeMode(QHeaderView.Stretch)
+        rows= self.tableView.verticalHeader()
+        rows.setSectionResizeMode(QHeaderView.Stretch)
+        rows.setVisible(False)
+
+        button = QPushButton()
+        
+        self.layout.addWidget(button)
+        self.setLayout(self.layout)
+
+    def Itemchanged(self):
+        data = [(str(self.model.data(self.model.index(0, colj)))) for colj in range(5)]
+        print(data)
+        # for i in range(5):
+            # self.model.setData(self.model.index(0, i), str(),0)
+        
 
 
 class MainWindow(QMainWindow):
@@ -127,10 +172,13 @@ class MainWindow(QMainWindow):
 
     def selectedRow(self, clickedIndex):
         self.selected_row = clickedIndex.row()
+        self.data_row = data.iloc[self.selected_row,0:3].values
+
+        self.add_product = AddProduct(self.data_row)
+        self.add_product.exec_()
 
 
-        data_row = data.iloc[self.selected_row,:].values
-        print(data_row)
+        print(self.data_row)
         print(self.selected_row)
 
 app = QApplication(sys.argv)
