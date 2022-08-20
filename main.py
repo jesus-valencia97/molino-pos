@@ -51,7 +51,10 @@ class PandasModel(QAbstractTableModel):
 class AddProduct(QDialog):
     def __init__(self,product_info):
         super().__init__()
-        self.setFixedSize(500,100)
+
+        self.colclicked = 0
+
+        self.setFixedSize(600,100)
         self.layout = QVBoxLayout()
 
         self.temp_product = product_info
@@ -60,24 +63,26 @@ class AddProduct(QDialog):
         self.tableView = QTableView()
         self.layout.addWidget(self.tableView)
     
-        self.model =  QStandardItemModel(0,6)
+        self.model =  QStandardItemModel(0,5)
         self.model.insertRow(0,list(map(QStandardItem,self.temp_product)))
         self.model.setRowCount(1)
-        self.model.itemChanged.connect(self.Itemchanged)
-
+        self.tableView.clicked.connect(self.itemclicked)
+        self.model.itemChanged.connect(self.Itemchanged,self.colclicked)
 
         self.model.setHeaderData(0, Qt.Horizontal,"ID")
         self.model.setHeaderData(1, Qt.Horizontal,"Descripción")
         self.model.setHeaderData(2, Qt.Horizontal,"Precio (KG)")
         self.model.setHeaderData(3, Qt.Horizontal,"Cantidad ($)")
         self.model.setHeaderData(4, Qt.Horizontal,"Cantidad (KG)")
-        self.model.setHeaderData(5, Qt.Horizontal,"Total")
+        # self.model.setHeaderData(5, Qt.Horizontal,"Total")
 
         self.tableView.setModel(self.model)
 
         header = self.tableView.horizontalHeader()
-        # header.setCont
+        # header.setSectionResizeMode(0,QHeaderView.Stretch)
         header.setSectionResizeMode(QHeaderView.Stretch)
+        header.setSectionResizeMode(1,QHeaderView.Stretch)
+        
         rows= self.tableView.verticalHeader()
         rows.setSectionResizeMode(QHeaderView.Stretch)
         rows.setVisible(False)
@@ -87,11 +92,51 @@ class AddProduct(QDialog):
         self.layout.addWidget(button)
         self.setLayout(self.layout)
 
-    def Itemchanged(self):
+    def itemclicked(self,clickedIndex):
+        self.colclicked = clickedIndex.column()
+
+
+
+    def Itemchanged(self,col):
         data = [(str(self.model.data(self.model.index(0, colj)))) for colj in range(5)]
-        print(data)
-        # for i in range(5):
-            # self.model.setData(self.model.index(0, i), str(),0)
+
+        col = col.column()
+        print(col)
+        try:
+            float(data[3]) + 1
+        except:
+            data[3] = "0"
+
+        try:
+            float(data[4]) + 1
+            
+        except:
+            data[4] = "0"
+
+        if col == 3:
+            qty= str(float(data[3])/float(self.temp_product[2]))
+            data[4] = qty   
+            # data_co = data
+            # self.model.setData(self.model.index(0, 4), "{:.2f}".format(data[4]),0)
+            self.model.setData(self.model.index(0, 4), data[4],0)
+
+        if col == 4:
+            price = str(float(data[4])*float(self.temp_product[2]))
+            data[3] = price
+            # data_co = data
+            # self.model.setData(self.model.index(0, 3), "{:.2f}".format(data[3]),0)
+            self.model.setData(self.model.index(0, 3), data[3],0)
+
+
+        self.model.setData(self.model.index(0, 0), self.temp_product[0],0)
+        self.model.setData(self.model.index(0, 1), self.temp_product[1],0)
+        self.model.setData(self.model.index(0, 2), self.temp_product[2],0)
+        # # self.model.setData(self.model.index(0, 3), data[3],0)
+        # self.model.setData(self.model.index(0, 4), data[4],0)
+
+        # print(data_co)
+        # self.model.setData(self.model.index(0, 5), float(data[4]) * float(self.temp_product[2]),0)
+        
         
 
 
