@@ -12,6 +12,12 @@ import pandas as pd
 data  = pd.read_excel('Etiquetas KG.xlsx', sheet_name='KG')
 # data = pd.read_csv("C:/Users/Jesus/Documents/Diplomado/Proyecto/Datasets/TMDb/TitleToConvert.csv",nrows=10)
 
+orderNo = 1
+orderedItems = []
+totalPrice = 0
+orderModel = QtGui.QStandardItemModel()
+orderModel.setHorizontalHeaderLabels(['No', '상품명', '수량', '금액'])
+
 
 class Color(QWidget):
 
@@ -196,12 +202,17 @@ class MainWindow(QMainWindow):
         sell_lo.addLayout(search_lo,10)
         sell_lo.addLayout(inventory_lo,70)
 
-        
+            
 
 
         ##
         chechout_lo = QVBoxLayout()
+        
+        coinfo_lo = QHBoxLayout()
+        coinfo_lo.addWidget(Color('red'))
 
+        chechout = QTableView()
+        model_co = PandasModel(data)
 
 
         ## Final arrange
