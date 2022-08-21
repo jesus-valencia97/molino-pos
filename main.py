@@ -16,8 +16,25 @@ orderNo = 1
 orderedItems = []
 totalPrice = 0
 orderModel = QStandardItemModel()
-orderModel.setHorizontalHeaderLabels(['No', 'Producto', 'Precio', 'Total'])
+orderModel.setHorizontalHeaderLabels(['ID', 'Producto', 'Precio', 'Cantidad\n(KG)', '  Total  '])
 
+class InitialDelegate(QStyledItemDelegate):
+    def __init__(self, decimals, parent=None):
+        super().__init__(parent)
+        self.nDecimals = decimals
+
+    def initStyleOption(self, option, index):
+        super().initStyleOption(option, index)
+        option.displayAlignment = Qt.AlignCenter
+        try:
+            text = index.model().data(index, Qt.DisplayRole)
+            number = float(text)
+            if number.is_integer():
+                option.text = "{:,.{}f}".format(number, 0)
+            else:
+                option.text = "{:,.{}f}".format(number, self.nDecimals)
+        except:
+            pass
 
 class Color(QWidget):
 
@@ -60,40 +77,37 @@ class AddProduct(QDialog):
 
         self.colclicked = 0
 
-        self.resize(450,150)
+        self.resize(600,150)
         self.layout = QVBoxLayout()
 
         self.temp_product = product_info
+        self.temp_product.append("0")
+        self.temp_product.append("0")
         self.temp_product = list(map(str,self.temp_product))
+        self.data = self.temp_product
 
         self.tableView = QTableView()
         
     
-        self.model =  QStandardItemModel(0,5)
+        self.model =  QStandardItemModel()
         self.model.insertRow(0,list(map(QStandardItem,self.temp_product)))
-        self.model.setRowCount(1)
 
-        
 
-        self.model.setHeaderData(0, Qt.Horizontal,"ID")
-        self.model.setHeaderData(1, Qt.Horizontal,"Descripción")
-        self.model.setHeaderData(2, Qt.Horizontal,"Precio (KG)")
-        self.model.setHeaderData(3, Qt.Horizontal,"Cantidad ($)")
-        self.model.setHeaderData(4, Qt.Horizontal,"Cantidad (KG)")
-        # self.model.setHeaderData(5, Qt.Horizontal,"Total")
 
         self.tableView.setModel(self.model)
 
-        print('s')
+        self.tableView.horizontalHeader().setSectionResizeMode(1,QHeaderView.Stretch)
 
-        header = self.tableView.horizontalHeader()
-        header.setSectionResizeMode(1,QHeaderView.Stretch)
-        header.setSectionResizeMode(QHeaderView.Stretch)
-        # header.setSectionResizeMode(0,QHeaderView.Stretch)
-        # header.setSectionResizeMode(1,QHeaderView.Stretch)
-        # header.setSectionResizeMode(2,QHeaderView.Stretch)
-        # header.setSectionResizeMode(3,QHeaderView.Stretch)
-        # header.setSectionResizeMode(4,QHeaderView.Stretch)
+
+        self.model.setHeaderData(0, Qt.Horizontal,"ID")
+        self.model.setHeaderData(1, Qt.Horizontal,"Descripción")
+        self.model.setHeaderData(2, Qt.Horizontal,"Precio\n(KG)")
+        self.model.setHeaderData(3, Qt.Horizontal,"Cantidad\n($)")
+        self.model.setHeaderData(4, Qt.Horizontal,"Cantidad\n(KG)")
+        
+        self.tableView.resizeColumnsToContents()
+
+        self.tableView.selectColumn(3)
         
         rows= self.tableView.verticalHeader()
         rows.setSectionResizeMode(QHeaderView.Stretch)
@@ -109,6 +123,10 @@ class AddProduct(QDialog):
         self.tableView.clicked.connect(self.itemclicked)
         self.model.itemChanged.connect(self.Itemchanged,self.colclicked)
         addbutton.clicked.connect(self.add_co)
+
+        self.tableView.setItemDelegateForColumn(4, InitialDelegate(4, self.tableView))
+        self.tableView.setItemDelegateForColumn(3, InitialDelegate(2, self.tableView))
+        self.tableView.setItemDelegateForColumn(2, InitialDelegate(1, self.tableView))
 
     def itemclicked(self,clickedIndex):
         self.colclicked = clickedIndex.column()
@@ -155,24 +173,32 @@ class AddProduct(QDialog):
         # self.temp_roduct = data
         
     def add_co(self):
-        # global orderNo, orderedItems, totalPrice
-        # productName = index.data()
-        # if productName in orderedItems:
-        #     orderRow = int(orderedItems.index(productName))
-        #     orderQuantity = int(orderModel.index(orderRow, 2).data()) + 1
-        #     orderModel.setItem(orderRow, 2, QtGui.QStandardItem('{:,}'.format(orderQuantity)))
-        #     orderModel.setItem(orderRow, 3, QtGui.QStandardItem('{:,}'.format(orderQuantity * price)))
-        # else:
-        #     orderedItems.append(productName)
-        #     row = [QtGui.QStandardItem('{:,}'.format(orderNo)), QtGui.QStandardItem(productName),
-        #             QtGui.QStandardItem('1'), QtGui.QStandardItem('{:,}'.format(price))]
-        #     orderModel.appendRow(row)
-        #     orderNo += 1
-        # totalPrice += price
+        
+        global orderNo, orderedItems, totalPrice
+        idProduct = self.data[0]
+        # print(idProduct)
+        # print(orderedItems)
+        qty = self.data[4]
+        temp_price = self.data[3]
+        if idProduct in orderedItems:
+            orderRow = int(orderedItems.index(idProduct))
+            # print(orderRow)
+            orderQuantity = str(float(orderModel.index(orderRow, 3).data()) + float(qty))
+            net_price = str(float(self.data[2]) * float(orderQuantity))
+            # print(orderQuantity)
+            orderModel.setItem(orderRow, 3, QStandardItem(orderQuantity))
+            orderModel.setItem(orderRow, 4, QStandardItem(net_price))
+        else:
+            orderedItems.append(idProduct)
+            row = [QStandardItem(self.data[0]),QStandardItem(self.data[1]),QStandardItem(self.data[2]),QStandardItem(self.data[4]),QStandardItem(self.data[3])]
+            orderModel.appendRow(row)
+            orderNo += 1
+
+        totalPrice += float(temp_price)
         # self.orderList.resizeColumnsToContents()
         # self.totalPriceBox.setPlainText('{:,}'.format(totalPrice))
         # self.orderList.setModel(orderModel)
-
+        print(totalPrice)
         self.close()
         
 
@@ -180,7 +206,7 @@ class AddProduct(QDialog):
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
-        self.resize(1000,800)
+        self.resize(1200,800)
 
         ## General Layout        
         general_lo = QHBoxLayout()
@@ -214,6 +240,7 @@ class MainWindow(QMainWindow):
 
         header = view.horizontalHeader()       
         header.setSectionResizeMode(1, QHeaderView.Stretch)
+        view.resizeColumnsToContents()
         
         view.setSelectionBehavior(QTableView.SelectRows)
         self.selected_row=-1
@@ -245,16 +272,20 @@ class MainWindow(QMainWindow):
         checkout = QTableView()
         checkout.setModel(orderModel)
         checkout.horizontalHeader().setSectionResizeMode(1,QHeaderView.Stretch)
+
         checkout.resizeColumnsToContents()
 
+        checkout.setItemDelegateForColumn(2, InitialDelegate(1, checkout))
+        checkout.setItemDelegateForColumn(3, InitialDelegate(4, checkout))
+        checkout.setItemDelegateForColumn(4, InitialDelegate(2, checkout))
 
 
         chechout_lo.addLayout(coinfo_lo,30)
         chechout_lo.addWidget(checkout,50)
 
         ## Final arrange
-        general_lo.addLayout(sell_lo,70)
-        general_lo.addLayout(chechout_lo,30)
+        general_lo.addLayout(sell_lo,60)
+        general_lo.addLayout(chechout_lo,40)
 
 
         widget = QWidget()
@@ -265,7 +296,7 @@ class MainWindow(QMainWindow):
 
     def selectedRow(self, clickedIndex):
         self.selected_row = clickedIndex.row()
-        self.data_row = data.iloc[self.selected_row,0:3].values
+        self.data_row = list(data.iloc[self.selected_row,0:3].values)
 
         self.add_product = AddProduct(self.data_row)
         self.add_product.exec_()
