@@ -15,7 +15,7 @@ data  = pd.read_excel('Etiquetas KG.xlsx', sheet_name='KG')
 orderNo = 1
 orderedItems = []
 totalPrice = 0
-orderModel = QtGui.QStandardItemModel()
+orderModel = QStandardItemModel()
 orderModel.setHorizontalHeaderLabels(['No', '상품명', '수량', '금액'])
 
 
