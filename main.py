@@ -139,15 +139,17 @@ class AddProduct(QDialog):
         # print('here')
         col = col.column()
         # print(col)
+        print(float('1/4'))
         try:
             float(self.data[3]) + 1
         except:
             self.data[3] = "0"
-
+            self.model.setData(self.model.index(0, 3), self.data[3],0)
         try:
             float(self.data[4]) + 1
         except:
             self.data[4] = "0"
+            self.model.setData(self.model.index(0, 4), self.data[4],0)
 
         if col == 3: # <- Fixed price
             qty= str(float(self.data[3])/float(self.temp_product[2]))
