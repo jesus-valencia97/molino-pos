@@ -78,7 +78,7 @@ class AddProduct(QDialog):
 
         self.tableView.setModel(self.model)
 
-        
+        print('s')
 
         header = self.tableView.horizontalHeader()
         header.setSectionResizeMode(1,QHeaderView.Stretch)
