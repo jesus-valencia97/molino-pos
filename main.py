@@ -16,7 +16,7 @@ orderNo = 1
 orderedItems = []
 totalPrice = 0
 orderModel = QStandardItemModel()
-orderModel.setHorizontalHeaderLabels(['No', '상품명', '수량', '금액'])
+orderModel.setHorizontalHeaderLabels(['No', 'Producto', 'Precio', 'Total'])
 
 
 class Color(QWidget):
@@ -155,6 +155,24 @@ class AddProduct(QDialog):
         # self.temp_roduct = data
         
     def add_co(self):
+        # global orderNo, orderedItems, totalPrice
+        # productName = index.data()
+        # if productName in orderedItems:
+        #     orderRow = int(orderedItems.index(productName))
+        #     orderQuantity = int(orderModel.index(orderRow, 2).data()) + 1
+        #     orderModel.setItem(orderRow, 2, QtGui.QStandardItem('{:,}'.format(orderQuantity)))
+        #     orderModel.setItem(orderRow, 3, QtGui.QStandardItem('{:,}'.format(orderQuantity * price)))
+        # else:
+        #     orderedItems.append(productName)
+        #     row = [QtGui.QStandardItem('{:,}'.format(orderNo)), QtGui.QStandardItem(productName),
+        #             QtGui.QStandardItem('1'), QtGui.QStandardItem('{:,}'.format(price))]
+        #     orderModel.appendRow(row)
+        #     orderNo += 1
+        # totalPrice += price
+        # self.orderList.resizeColumnsToContents()
+        # self.totalPriceBox.setPlainText('{:,}'.format(totalPrice))
+        # self.orderList.setModel(orderModel)
+
         self.close()
         
 
@@ -224,9 +242,15 @@ class MainWindow(QMainWindow):
         coinfo_lo = QHBoxLayout()
         coinfo_lo.addWidget(Color('red'))
 
-        chechout = QTableView()
-        model_co = PandasModel(data)
+        checkout = QTableView()
+        checkout.setModel(orderModel)
+        checkout.horizontalHeader().setSectionResizeMode(1,QHeaderView.Stretch)
+        checkout.resizeColumnsToContents()
 
+
+
+        chechout_lo.addLayout(coinfo_lo,30)
+        chechout_lo.addWidget(checkout,50)
 
         ## Final arrange
         general_lo.addLayout(sell_lo,70)
