@@ -54,20 +54,20 @@ class AddProduct(QDialog):
 
         self.colclicked = 0
 
-        self.setFixedSize(600,100)
+        self.resize(450,150)
         self.layout = QVBoxLayout()
 
         self.temp_product = product_info
         self.temp_product = list(map(str,self.temp_product))
 
         self.tableView = QTableView()
-        self.layout.addWidget(self.tableView)
+        
     
         self.model =  QStandardItemModel(0,5)
         self.model.insertRow(0,list(map(QStandardItem,self.temp_product)))
         self.model.setRowCount(1)
-        self.tableView.clicked.connect(self.itemclicked)
-        self.model.itemChanged.connect(self.Itemchanged,self.colclicked)
+
+        
 
         self.model.setHeaderData(0, Qt.Horizontal,"ID")
         self.model.setHeaderData(1, Qt.Horizontal,"Descripción")
@@ -78,65 +78,78 @@ class AddProduct(QDialog):
 
         self.tableView.setModel(self.model)
 
+        
+
         header = self.tableView.horizontalHeader()
-        # header.setSectionResizeMode(0,QHeaderView.Stretch)
-        header.setSectionResizeMode(QHeaderView.Stretch)
         header.setSectionResizeMode(1,QHeaderView.Stretch)
+        header.setSectionResizeMode(QHeaderView.Stretch)
+        # header.setSectionResizeMode(0,QHeaderView.Stretch)
+        # header.setSectionResizeMode(1,QHeaderView.Stretch)
+        # header.setSectionResizeMode(2,QHeaderView.Stretch)
+        # header.setSectionResizeMode(3,QHeaderView.Stretch)
+        # header.setSectionResizeMode(4,QHeaderView.Stretch)
         
         rows= self.tableView.verticalHeader()
         rows.setSectionResizeMode(QHeaderView.Stretch)
         rows.setVisible(False)
 
-        button = QPushButton()
-        
-        self.layout.addWidget(button)
+        addbutton = QPushButton()
+        addbutton.setFixedHeight(50)
+
+        self.layout.addWidget(self.tableView)
+        self.layout.addWidget(addbutton)
         self.setLayout(self.layout)
+
+        self.tableView.clicked.connect(self.itemclicked)
+        self.model.itemChanged.connect(self.Itemchanged,self.colclicked)
+        addbutton.clicked.connect(self.add_co)
 
     def itemclicked(self,clickedIndex):
         self.colclicked = clickedIndex.column()
+        # print(self.colclicked)
 
 
 
     def Itemchanged(self,col):
-        data = [(str(self.model.data(self.model.index(0, colj)))) for colj in range(5)]
-
+        self.data = [(str(self.model.data(self.model.index(0, colj)))) for colj in range(5)]
+        # print('here')
         col = col.column()
-        print(col)
+        # print(col)
         try:
-            float(data[3]) + 1
+            float(self.data[3]) + 1
         except:
-            data[3] = "0"
+            self.data[3] = "0"
 
         try:
-            float(data[4]) + 1
-            
+            float(self.data[4]) + 1
         except:
-            data[4] = "0"
+            self.data[4] = "0"
 
-        if col == 3:
-            qty= str(float(data[3])/float(self.temp_product[2]))
-            data[4] = qty   
+        if col == 3: # <- Fixed price
+            qty= str(float(self.data[3])/float(self.temp_product[2]))
+            self.data[4] = qty   
             # data_co = data
             # self.model.setData(self.model.index(0, 4), "{:.2f}".format(data[4]),0)
-            self.model.setData(self.model.index(0, 4), data[4],0)
+            self.model.setData(self.model.index(0, 4), self.data[4],0)
 
-        if col == 4:
-            price = str(float(data[4])*float(self.temp_product[2]))
-            data[3] = price
+        if col == 4: # <- Fixed qty
+            price = str(float(self.data[4])*float(self.temp_product[2]))
+            self.data[3] = price
             # data_co = data
             # self.model.setData(self.model.index(0, 3), "{:.2f}".format(data[3]),0)
-            self.model.setData(self.model.index(0, 3), data[3],0)
+            self.model.setData(self.model.index(0, 3), self.data[3],0)
 
 
         self.model.setData(self.model.index(0, 0), self.temp_product[0],0)
         self.model.setData(self.model.index(0, 1), self.temp_product[1],0)
         self.model.setData(self.model.index(0, 2), self.temp_product[2],0)
-        # # self.model.setData(self.model.index(0, 3), data[3],0)
-        # self.model.setData(self.model.index(0, 4), data[4],0)
 
-        # print(data_co)
-        # self.model.setData(self.model.index(0, 5), float(data[4]) * float(self.temp_product[2]),0)
+        print(self.temp_product)
+        print(self.data)
+        # self.temp_roduct = data
         
+    def add_co(self):
+        self.close()
         
 
 
@@ -176,7 +189,7 @@ class MainWindow(QMainWindow):
         view.setModel(model)
 
         header = view.horizontalHeader()       
-        header.setSectionResizeMode(0, QHeaderView.Stretch)
+        header.setSectionResizeMode(1, QHeaderView.Stretch)
         
         view.setSelectionBehavior(QTableView.SelectRows)
         self.selected_row=-1
@@ -221,10 +234,10 @@ class MainWindow(QMainWindow):
 
         self.add_product = AddProduct(self.data_row)
         self.add_product.exec_()
+        print(self.add_product.temp_product,'asdsa')
 
-
-        print(self.data_row)
-        print(self.selected_row)
+        # print(self.data_row)
+        # print(self.selected_row)
 
 app = QApplication(sys.argv)
 
