@@ -136,7 +136,7 @@ class AddProduct(QDialog):
 
     def Itemchanged(self,col):
         self.data = [(str(self.model.data(self.model.index(0, colj)))) for colj in range(5)]
-        # print('here')
+        print('here')
         col = col.column()
         # print(col)
         print(float('1/4'))
