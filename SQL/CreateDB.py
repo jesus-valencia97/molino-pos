@@ -17,7 +17,8 @@ c.execute(table_products)
 
 
 # %%
-c.execute(" SELECT * FROM products")
+c.execute("SELECT * FROM products where precio_kg > 800 ")
+print(c.fetchall())
 
 
 # %%
